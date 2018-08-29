@@ -84,7 +84,7 @@ gobgp/vendor: gobgp
 		-w /go/src/github.com/osrg/gobgp \
 		-e LOCAL_USER_ID=$(LOCAL_USER_ID) \
 		-e ARCH=$(ARCH) \
-		-e GOARCH=$(ARCH) GOARM=7 \
+		-e GOARCH=$(ARCH) -e GOARM=7 \
 		$(CALICO_BUILD) dep ensure
 
 $(BIN)/gobgp: gobgp gobgp/vendor
@@ -95,7 +95,7 @@ $(BIN)/gobgp: gobgp gobgp/vendor
 		-w /go/src/github.com/osrg/gobgp \
 		-e LOCAL_USER_ID=$(LOCAL_USER_ID) \
 		-e ARCH=$(ARCH) \
-		-e GOARCH=$(ARCH) GOARM=7 \
+		-e GOARCH=$(ARCH) -e GOARM=7 \
 		$(CALICO_BUILD) go build -v -o /outbin/gobgp github.com/osrg/gobgp/gobgp
 
 $(BIN)/calico-bgp-daemon: $(SRC_FILES) vendor $(BIN)/gobgp
@@ -106,7 +106,7 @@ $(BIN)/calico-bgp-daemon: $(SRC_FILES) vendor $(BIN)/gobgp
 	-e LOCAL_USER_ID=$(LOCAL_USER_ID) \
 	-v $(CURDIR)/.go-pkg-cache:/go-cache/:rw \
 	-e GOCACHE=/go-cache \
-	-e GOARCH=$(ARCH) GOARM=7 \
+	-e GOARCH=$(ARCH) -e GOARM=7 \
 		$(CALICO_BUILD) sh -c '\
 			cd /go/src/$(PACKAGE_NAME) && \
 			go build -v -o $(BIN)/calico-bgp-daemon \
