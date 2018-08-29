@@ -33,13 +33,16 @@ ARCH ?= $(BUILDARCH)
 ifeq ($(ARCH),aarch64)
         override ARCH=arm64
 endif
+ifeq ($(ARCH),armv7)
+        override ARCH=arm
+endif
 ifeq ($(ARCH),x86_64)
     override ARCH=amd64
 endif
 ###############################################################################
 GO_BUILD_VER ?= v0.16
 
-CALICO_BUILD?=calico/go-build:$(GO_BUILD_VER)
+CALICO_BUILD?=nixm0nk3y/go-build:latest
 SRC_FILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./gobgp/*")
 GOBGPD_VERSION?=$(shell git describe --tags --dirty)
 CONTAINER_NAME?=calico/gobgpd
@@ -81,7 +84,7 @@ gobgp/vendor: gobgp
 		-w /go/src/github.com/osrg/gobgp \
 		-e LOCAL_USER_ID=$(LOCAL_USER_ID) \
 		-e ARCH=$(ARCH) \
-		-e GOARCH=$(ARCH) \
+		-e GOARCH=$(ARCH) GOARM=7 \
 		$(CALICO_BUILD) dep ensure
 
 $(BIN)/gobgp: gobgp gobgp/vendor
@@ -92,7 +95,7 @@ $(BIN)/gobgp: gobgp gobgp/vendor
 		-w /go/src/github.com/osrg/gobgp \
 		-e LOCAL_USER_ID=$(LOCAL_USER_ID) \
 		-e ARCH=$(ARCH) \
-		-e GOARCH=$(ARCH) \
+		-e GOARCH=$(ARCH) GOARM=7 \
 		$(CALICO_BUILD) go build -v -o /outbin/gobgp github.com/osrg/gobgp/gobgp
 
 $(BIN)/calico-bgp-daemon: $(SRC_FILES) vendor $(BIN)/gobgp
@@ -103,7 +106,7 @@ $(BIN)/calico-bgp-daemon: $(SRC_FILES) vendor $(BIN)/gobgp
 	-e LOCAL_USER_ID=$(LOCAL_USER_ID) \
 	-v $(CURDIR)/.go-pkg-cache:/go-cache/:rw \
 	-e GOCACHE=/go-cache \
-	-e GOARCH=$(ARCH) \
+	-e GOARCH=$(ARCH) GOARM=7 \
 		$(CALICO_BUILD) sh -c '\
 			cd /go/src/$(PACKAGE_NAME) && \
 			go build -v -o $(BIN)/calico-bgp-daemon \
